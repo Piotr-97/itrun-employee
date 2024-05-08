@@ -501,7 +501,11 @@ public class Main {
             throw new RuntimeException(e);
         }
         //then
-        personFacade.updatePerson(newperson,PersonType.EXTERNAL.getType());
+        try {
+            personFacade.updatePerson(newperson,PersonType.EXTERNAL.getType());
+        } catch (NotFoundPersonException e) {
+            System.out.println("shouldModifyPerson : test went wrong");
+        }
 
         try {
              modPerson = personFacade.find(null, "9999", null, null, null, null, null);
@@ -540,21 +544,25 @@ public class Main {
         //when
         try {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
-        } catch (AlreadyExistsPersonException e) {
-            System.out.println("shouldModifyPerson : test went wrong " + e.getMessage());
+        } catch (AlreadyExistsPersonException ignored) {
+
         } catch (EmptyFieldPersonException e) {
             throw new RuntimeException(e);
         }
         //then
-        personFacade.updatePerson(newperson,PersonType.EXTERNAL.getType());
+        try {
+            personFacade.updatePerson(newperson,PersonType.EXTERNAL.getType());
+        } catch (NotFoundPersonException ignored) {
+        }
 
         try {
             modPerson = personFacade.find(null, "9999", null, null, null, null, null);
         } catch (NotFoundPersonException e) {
-            System.out.println("shouldModifyPerson : test went wrong " + e.getMessage());
+            System.out.println("shouldNotModifyPerson : test went wrong " + e.getMessage());
         }
 
-        if(person.getFirstname().equals(Objects.requireNonNull(modPerson).getFirstname())){
+        assert modPerson != null;
+        if(person.getFirstname().equals(modPerson.getFirstname())){
             throw new AssertionError("Throw if person was modified");
         }
         clearExternal(personFacade);

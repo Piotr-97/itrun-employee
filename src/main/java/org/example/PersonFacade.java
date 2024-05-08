@@ -101,15 +101,13 @@ public class PersonFacade {
         return person;
     }
 
-    public void updatePerson(Person person, String type) {
+    public void updatePerson(Person person, String type) throws NotFoundPersonException {
         try {
             personRepository.update(person, type);
             xmlWriter.modifyPersonXml(person, type);
 
         } catch (ParserConfigurationException | IOException | SAXException | TransformerException e) {
             throw new RuntimeException(e);
-        } catch (NotFoundPersonException e) {
-            System.out.println(e.getMessage());
         }
     }
 
