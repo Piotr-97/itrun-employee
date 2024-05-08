@@ -123,7 +123,7 @@ public class PersonRepository {
             }
         } else {
 
-            System.out.println("Podana ścieżka nie istnieje lub nie jest katalogiem.");
+            System.out.println("File path doesn't exists");
         }
 
     }
