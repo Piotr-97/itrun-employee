@@ -1,4 +1,4 @@
-package org.example;
+package org.example.utils;
 
 import org.example.model.Person;
 import org.w3c.dom.Document;

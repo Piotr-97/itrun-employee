@@ -1,11 +1,15 @@
-package org.example;
+package org.example.repository;
 
+import org.example.exceptions.NotFoundPersonException;
+import org.example.utils.XmlReader;
 import org.example.model.Person;
 import org.example.model.PersonType;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.example.PersonFacade.XML_FILE_EXTENSION;
 
 public class PersonRepository {
 
@@ -52,11 +56,11 @@ public class PersonRepository {
 
 
     public void saveInternal(Person person) {
-        internalPersons.put(person.getPersonId() + ".xml", person);
+        internalPersons.put(person.getPersonId() + XML_FILE_EXTENSION, person);
     }
 
     public void saveExternal(Person person) {
-        externalsPersons.put(person.getPersonId() + ".xml", person);
+        externalsPersons.put(person.getPersonId() + XML_FILE_EXTENSION, person);
     }
 
     public boolean isInternalPersonAlreadyExists(Person person) {
@@ -64,11 +68,11 @@ public class PersonRepository {
     }
 
     public boolean isFileWithInternalPersonIdExits(String personId) {
-        return internalPersons.containsKey(personId + ".xml");
+        return internalPersons.containsKey(personId + XML_FILE_EXTENSION);
     }
 
     public boolean isFileWithExternalPersonIdExits(String personId) {
-        return externalsPersons.containsKey(personId + ".xml");
+        return externalsPersons.containsKey(personId + XML_FILE_EXTENSION);
     }
 
     public boolean isExternalPersonAlreadyExists(Person person) {
@@ -77,9 +81,9 @@ public class PersonRepository {
 
     public void removePerson(String idPerson, String type) {
         if (type.equals(PersonType.INTERNAL.getType())) {
-            internalPersons.remove(idPerson + ".xml");
+            internalPersons.remove(idPerson + XML_FILE_EXTENSION);
         } else {
-            externalsPersons.remove(idPerson + ".xml");
+            externalsPersons.remove(idPerson +XML_FILE_EXTENSION);
         }
     }
 
@@ -91,7 +95,7 @@ public class PersonRepository {
             File[] files = directory.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (file.isFile() && file.getName().endsWith(".xml")) {
+                    if (file.isFile() && file.getName().endsWith(XML_FILE_EXTENSION)) {
                         person = xmlReader.readPersonFromFile("external" + File.separator + file.getName());
                         externalsPersons.put(file.getName(), person);
                     }
@@ -110,7 +114,7 @@ public class PersonRepository {
 
             if (files != null) {
                 for (File file : files) {
-                    if (file.isFile() && file.getName().endsWith(".xml")) {
+                    if (file.isFile() && file.getName().endsWith(XML_FILE_EXTENSION)) {
                         person = xmlReader.readPersonFromFile("internal" + File.separator + file.getName());
 
                         internalPersons.put(file.getName(), person);
@@ -126,7 +130,7 @@ public class PersonRepository {
 
     public void update(Person newPerson, String type) throws NotFoundPersonException {
 
-        Person oldPerson = type.equals(PersonType.INTERNAL.getType()) ? internalPersons.get(newPerson.getPersonId() + ".xml") : externalsPersons.get(newPerson.getPersonId() + ".xml");
+        Person oldPerson = type.equals(PersonType.INTERNAL.getType()) ? internalPersons.get(newPerson.getPersonId() + XML_FILE_EXTENSION) : externalsPersons.get(newPerson.getPersonId() + XML_FILE_EXTENSION);
         if (oldPerson == null) {
             throw new NotFoundPersonException("Person with provided person id doesn't exists");
         }
@@ -147,9 +151,9 @@ public class PersonRepository {
         }
 
         if (type.equals(PersonType.INTERNAL.getType())) {
-            internalPersons.put(oldPerson.getPersonId() + ".xml", oldPerson);
+            internalPersons.put(oldPerson.getPersonId() + XML_FILE_EXTENSION, oldPerson);
         } else if (type.equals(PersonType.EXTERNAL.getType())) {
-            externalsPersons.put(oldPerson.getPersonId() + ".xml", oldPerson);
+            externalsPersons.put(oldPerson.getPersonId() + XML_FILE_EXTENSION, oldPerson);
         }
     }
 

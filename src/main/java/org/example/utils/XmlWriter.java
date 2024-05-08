@@ -1,4 +1,4 @@
-package org.example;
+package org.example.utils;
 
 import org.example.model.Person;
 import org.example.model.PersonType;
@@ -15,6 +15,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
+
+import static org.example.PersonFacade.XML_FILE_EXTENSION;
 
 public class XmlWriter {
 
@@ -42,8 +44,8 @@ public class XmlWriter {
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource source = new DOMSource(doc);
         StreamResult result = type.equals(PersonType.INTERNAL.getType()) ?
-                new StreamResult(new File(pathToInternals + File.separator + person.getPersonId() + ".xml")) :
-                new StreamResult(new File(pathToExternals + File.separator + person.getPersonId() + ".xml"));
+                new StreamResult(new File(pathToInternals + File.separator + person.getPersonId() + XML_FILE_EXTENSION)) :
+                new StreamResult(new File(pathToExternals + File.separator + person.getPersonId() + XML_FILE_EXTENSION));
 
 
         transformer.transform(source, result);
@@ -60,8 +62,8 @@ public class XmlWriter {
 
     public void modifyPersonXml(Person person, String type) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         String filePath = type.equals(PersonType.INTERNAL.getType()) ?
-                (pathToInternals + File.separator + person.getPersonId() + ".xml") :
-                (pathToExternals + File.separator + person.getPersonId() + ".xml");
+                (pathToInternals + File.separator + person.getPersonId() + XML_FILE_EXTENSION) :
+                (pathToExternals + File.separator + person.getPersonId() + XML_FILE_EXTENSION);
 
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();

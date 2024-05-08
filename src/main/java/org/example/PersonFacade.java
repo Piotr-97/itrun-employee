@@ -1,7 +1,13 @@
 package org.example;
 
+import org.example.exceptions.AlreadyExistsPersonException;
+import org.example.exceptions.EmptyFieldPersonException;
+import org.example.exceptions.NotFoundPersonException;
 import org.example.model.Person;
 import org.example.model.PersonType;
+import org.example.repository.PersonRepository;
+import org.example.utils.PersonValidator;
+import org.example.utils.XmlWriter;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -11,19 +17,24 @@ import java.io.IOException;
 import java.util.Map;
 
 public class PersonFacade {
+    public static final String XML_FILE_EXTENSION = ".xml";
     private final XmlWriter xmlWriter;
+
+    private final PersonValidator personValidator;
     private final FileDeleter fileDeleter;
     private final PersonRepository personRepository;
     private static final String PATH_TO_INTERNALS = System.getProperty("user.dir") + File.separator + "internal";
     private static final String PATH_TO_EXTERNALS = System.getProperty("user.dir") + File.separator + "external";
 
-    public PersonFacade(XmlWriter xmlWriter, FileDeleter fileDeleter, PersonRepository personRepository) {
+    public PersonFacade(XmlWriter xmlWriter, PersonValidator personValidator, FileDeleter fileDeleter, PersonRepository personRepository) {
         this.xmlWriter = xmlWriter;
+        this.personValidator = personValidator;
         this.fileDeleter = fileDeleter;
         this.personRepository = personRepository;
     }
 
-    public void createNewPerson(Person person, String type) throws AlreadyExistsPersonException {
+    public void createNewPerson(Person person, String type) throws AlreadyExistsPersonException, EmptyFieldPersonException {
+        personValidator.checkPerson(person);
         if (type.equals(PersonType.INTERNAL.getType())) {
             createNewInternalPerson(person, type);
 
@@ -105,9 +116,9 @@ public class PersonFacade {
     public void removePerson(String idPerson, String type) throws NotFoundPersonException {
         if (personRepository.isFileWithInternalPersonIdExits(idPerson) || personRepository.isFileWithExternalPersonIdExits(idPerson)) {
             personRepository.removePerson(idPerson, type);
-            String fileName = idPerson + ".xml";
+            String fileName = idPerson + XML_FILE_EXTENSION;
             String pathToFile = type.equals(PersonType.INTERNAL.getType()) ? PATH_TO_INTERNALS + File.separator + fileName :
-                    (PATH_TO_EXTERNALS + File.separator + idPerson + ".xml");
+                    (PATH_TO_EXTERNALS + File.separator + idPerson + XML_FILE_EXTENSION);
 
             fileDeleter.deleteFile(pathToFile);
             return;

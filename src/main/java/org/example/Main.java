@@ -1,8 +1,15 @@
 package org.example;
 
 
+import org.example.exceptions.AlreadyExistsPersonException;
+import org.example.exceptions.EmptyFieldPersonException;
+import org.example.exceptions.NotFoundPersonException;
 import org.example.model.Person;
 import org.example.model.PersonType;
+import org.example.repository.PersonRepository;
+import org.example.utils.PersonValidator;
+import org.example.utils.XmlReader;
+import org.example.utils.XmlWriter;
 
 import java.io.File;
 import java.util.Map;
@@ -30,7 +37,8 @@ public class Main {
     public static void shouldRemoveInternalPersonFromDatabase() {
         //given
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -43,6 +51,8 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.INTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             e.printStackTrace();
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
         if (!personFacade.getAllInternals().containsKey(person.getPersonId() + ".xml")) {
             throw new AssertionError("shouldRemoveInternalPersonFromDatabase ERROR : Person is not in the database");
@@ -65,7 +75,8 @@ public class Main {
     public static void shouldNotRemovePersonFromDatabasePersonIdNotExists() {
         //given
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -90,7 +101,8 @@ public class Main {
     //Add
     public static void shouldAddNewInternalEmployee() {
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -104,6 +116,8 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.INTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldAddNewInternalEmployee : test went wrong " + e.getMessage());
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
 
         if (!personFacade.getAllInternals().containsKey(person.getPersonId() + ".xml")) {
@@ -124,7 +138,8 @@ public class Main {
 
     public static void shouldAddNewExternalEmployee() {
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -138,6 +153,8 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldAddNewInternalEmployee : test went wrong " + e.getMessage());
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
 
         if (!personFacade.getAllExternals().containsKey(person.getPersonId() + ".xml")) {
@@ -158,7 +175,8 @@ public class Main {
 
     public static void shouldNotAddNewEmployeeBecauseIdPersonAlreadyExists() {
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -172,11 +190,15 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldAddNewInternalEmployee : test went wrong " + e.getMessage());
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
         try {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldNotAddNewEmployeeBecauseIdPersonAlreadyExists : Test went correctly");
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
         //cleaning
         try {
@@ -192,7 +214,8 @@ public class Main {
 
     public static void shouldFindPersonByPersonId() {
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -207,6 +230,8 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldAddNewInternalEmployee : test went wrong " + e.getMessage());
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
 
         try {
@@ -228,7 +253,8 @@ public class Main {
 
     public static void shouldFindPersonByFirstName() {
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -243,6 +269,8 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldFindPersonByFirstName : test went wrong " + e.getMessage());
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
 
         try {
@@ -269,7 +297,8 @@ public class Main {
 
     public static void shouldFindPersonByLastName() {
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -284,6 +313,8 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldFindPersonByFirstName : test went wrong " + e.getMessage());
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
 
         try {
@@ -302,7 +333,8 @@ public class Main {
 
     public static void shouldFindPersonByMobile() {
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -317,6 +349,8 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldFindPersonByFirstName : test went wrong " + e.getMessage());
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
 
         try {
@@ -333,7 +367,8 @@ public class Main {
 
     public static void shouldFindPersonByEmail() {
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -348,6 +383,8 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldFindPersonByFirstName : test went wrong " + e.getMessage());
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
 
         try {
@@ -364,7 +401,8 @@ public class Main {
 
     public static void shouldFindPersonByPesel() {
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -379,6 +417,8 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldFindPersonByFirstName : test went wrong " + e.getMessage());
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
 
         try {
@@ -397,7 +437,8 @@ public class Main {
     public static void shouldFindPersonByFirstnameAndLastname() {
         //given
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -412,6 +453,8 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldFindPersonByFirstName : test went wrong " + e.getMessage());
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
         //then
         try {
@@ -430,7 +473,8 @@ public class Main {
         //given
         Person modPerson = null;
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -452,6 +496,8 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldModifyPerson : test went wrong " + e.getMessage());
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
         //then
         personFacade.updatePerson(newperson,PersonType.EXTERNAL.getType());
@@ -472,7 +518,8 @@ public class Main {
         //given
         Person modPerson = null;
         XmlReader xmlReader = new XmlReader();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), new FileDeleter(), new PersonRepository(xmlReader));
+        PersonValidator personValidator = new PersonValidator();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -494,6 +541,8 @@ public class Main {
             personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldModifyPerson : test went wrong " + e.getMessage());
+        } catch (EmptyFieldPersonException e) {
+            throw new RuntimeException(e);
         }
         //then
         personFacade.updatePerson(newperson,PersonType.EXTERNAL.getType());
