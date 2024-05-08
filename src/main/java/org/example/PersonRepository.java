@@ -104,7 +104,7 @@ public class PersonRepository {
         Person person = null;
 
         File directory = new File(PATH_TO_INTERNALS);
-        System.out.println(PATH_TO_INTERNALS);
+
         if (directory.exists() && directory.isDirectory()) {
             File[] files = directory.listFiles();
 

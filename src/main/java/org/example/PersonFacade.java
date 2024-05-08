@@ -14,7 +14,7 @@ public class PersonFacade {
     private final XmlWriter xmlWriter;
     private final FileDeleter fileDeleter;
     private final PersonRepository personRepository;
-    private static final String pathToInPATH_TO_INTERNALS = System.getProperty("user.dir") + File.separator + "internal";
+    private static final String PATH_TO_INTERNALS = System.getProperty("user.dir") + File.separator + "internal";
     private static final String PATH_TO_EXTERNALS = System.getProperty("user.dir") + File.separator + "external";
 
     public PersonFacade(XmlWriter xmlWriter, FileDeleter fileDeleter, PersonRepository personRepository) {
@@ -70,12 +70,12 @@ public class PersonFacade {
 
     public Person find(String type, String personId, String firstname, String lastname, String mobile, String email, String pesel) throws NotFoundPersonException {
         Person person = null;
-        if (type.isEmpty() || type.isBlank() || type == null) {
+        if (type == null) {
             person = personRepository.searchInInternals(personId, firstname, lastname, mobile, email, pesel);
             if (person != null) {
                 return person;
             }
-            personRepository.searchInExternals(personId, firstname, lastname, mobile, email, pesel);
+           person = personRepository.searchInExternals(personId, firstname, lastname, mobile, email, pesel);
 
         } else {
             person = type.equals(PersonType.INTERNAL.getType()) ?
@@ -97,7 +97,7 @@ public class PersonFacade {
         } catch (ParserConfigurationException | IOException | SAXException | TransformerException e) {
             throw new RuntimeException(e);
         } catch (NotFoundPersonException e) {
-            throw new RuntimeException(e);
+            System.out.println(e.getMessage());
         }
     }
 
@@ -106,7 +106,7 @@ public class PersonFacade {
         if (personRepository.isFileWithInternalPersonIdExits(idPerson) || personRepository.isFileWithExternalPersonIdExits(idPerson)) {
             personRepository.removePerson(idPerson, type);
             String fileName = idPerson + ".xml";
-            String pathToFile = type.equals(PersonType.INTERNAL.getType()) ? pathToInPATH_TO_INTERNALS + File.separator + fileName :
+            String pathToFile = type.equals(PersonType.INTERNAL.getType()) ? PATH_TO_INTERNALS + File.separator + fileName :
                     (PATH_TO_EXTERNALS + File.separator + idPerson + ".xml");
 
             fileDeleter.deleteFile(pathToFile);
@@ -120,4 +120,7 @@ public class PersonFacade {
     }
 
 
+    public Map<String, Person> getAllExternals(){
+        return personRepository.getExternalsPersons();
+    }
 }
