@@ -507,6 +507,7 @@ public class Main {
         if(person.getFirstname().equals(Objects.requireNonNull(modPerson).getFirstname())){
             throw new AssertionError("Throw if person was modified");
         }
+        clearExternal(personFacade);
 
     }
 
