@@ -7,6 +7,7 @@ import org.example.exceptions.NotFoundPersonException;
 import org.example.model.Person;
 import org.example.model.PersonType;
 import org.example.repository.PersonRepository;
+import org.example.utils.FileDeleter;
 import org.example.utils.PersonValidator;
 import org.example.utils.XmlReader;
 import org.example.utils.XmlWriter;
