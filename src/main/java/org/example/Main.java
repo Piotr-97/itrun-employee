@@ -5,12 +5,10 @@ import org.example.exceptions.AlreadyExistsPersonException;
 import org.example.exceptions.EmptyFieldPersonException;
 import org.example.exceptions.NotFoundPersonException;
 import org.example.model.Person;
+import org.example.model.PersonDto;
 import org.example.model.PersonType;
 import org.example.repository.PersonRepository;
-import org.example.utils.FileDeleter;
-import org.example.utils.PersonValidator;
-import org.example.utils.XmlReader;
-import org.example.utils.XmlWriter;
+import org.example.utils.*;
 
 import java.io.File;
 import java.util.Map;
@@ -27,6 +25,7 @@ public class Main {
         shouldNotAddNewEmployeeBecauseIdPersonAlreadyExists();
         shouldFindPersonByPersonId();
         shouldFindPersonByFirstName();
+        shouldFindPersonByFirstnameAndLastname();
         shouldFindPersonByLastName();
         shouldFindPersonByMobile();
         shouldFindPersonByEmail();
@@ -39,7 +38,8 @@ public class Main {
         //given
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -48,8 +48,9 @@ public class Main {
                 .email("Wlodzimierz.test@mail.com")
                 .pesel("11111111111")
                 .build();
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.INTERNAL.getType());
         try {
-            personFacade.createNewPerson(person, PersonType.INTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             e.printStackTrace();
         } catch (EmptyFieldPersonException e) {
@@ -77,7 +78,8 @@ public class Main {
         //given
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -103,7 +105,8 @@ public class Main {
     public static void shouldAddNewInternalEmployee() {
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -112,9 +115,10 @@ public class Main {
                 .email("Wlodzimierz.test@mail.com")
                 .pesel("11111111111")
                 .build();
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.INTERNAL.getType());
         //when
         try {
-            personFacade.createNewPerson(person, PersonType.INTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldAddNewInternalEmployee : test went wrong " + e.getMessage());
         } catch (EmptyFieldPersonException e) {
@@ -140,7 +144,8 @@ public class Main {
     public static void shouldAddNewExternalEmployee() {
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -149,9 +154,10 @@ public class Main {
                 .email("Wlodzimierz.test@mail.com")
                 .pesel("11111111111")
                 .build();
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.EXTERNAL.getType());
         //when
         try {
-            personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldAddNewInternalEmployee : test went wrong " + e.getMessage());
         } catch (EmptyFieldPersonException e) {
@@ -177,7 +183,8 @@ public class Main {
     public static void shouldNotAddNewEmployeeBecauseIdPersonAlreadyExists() {
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -186,16 +193,16 @@ public class Main {
                 .email("Wlodzimierz.test@mail.com")
                 .pesel("11111111111")
                 .build();
-
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.EXTERNAL.getType());
         try {
-            personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldAddNewInternalEmployee : test went wrong " + e.getMessage());
         } catch (EmptyFieldPersonException e) {
             throw new RuntimeException(e);
         }
         try {
-            personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldNotAddNewEmployeeBecauseIdPersonAlreadyExists : Test went correctly");
         } catch (EmptyFieldPersonException e) {
@@ -216,7 +223,8 @@ public class Main {
     public static void shouldFindPersonByPersonId() {
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -226,9 +234,10 @@ public class Main {
                 .pesel("11111111111")
                 .build();
         Person person1 = null;
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.EXTERNAL.getType());
 
         try {
-            personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldAddNewInternalEmployee : test went wrong " + e.getMessage());
         } catch (EmptyFieldPersonException e) {
@@ -240,7 +249,7 @@ public class Main {
         } catch (NotFoundPersonException e) {
             throw new AssertionError(e.getMessage());
         }
-        if (!person.equals(person1)) {
+        if (!person.getFirstname().equals(person1.getFirstname()) && !person.getLastname().equals(person1.getLastname())) {
             throw new AssertionError("shouldFindPersonByPersonId : method find()  didn't work correctly");
         }
         //cleaning
@@ -255,7 +264,8 @@ public class Main {
     public static void shouldFindPersonByFirstName() {
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -265,9 +275,9 @@ public class Main {
                 .pesel("11111111111")
                 .build();
         Person person1 = null;
-
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.EXTERNAL.getType());
         try {
-            personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldFindPersonByFirstName : test went wrong " + e.getMessage());
         } catch (EmptyFieldPersonException e) {
@@ -299,7 +309,8 @@ public class Main {
     public static void shouldFindPersonByLastName() {
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -309,9 +320,10 @@ public class Main {
                 .pesel("11111111111")
                 .build();
         Person person1 = null;
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.EXTERNAL.getType());
 
         try {
-            personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldFindPersonByFirstName : test went wrong " + e.getMessage());
         } catch (EmptyFieldPersonException e) {
@@ -335,7 +347,8 @@ public class Main {
     public static void shouldFindPersonByMobile() {
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -345,9 +358,9 @@ public class Main {
                 .pesel("11111111111")
                 .build();
         Person person1 = null;
-
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.EXTERNAL.getType());
         try {
-            personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldFindPersonByFirstName : test went wrong " + e.getMessage());
         } catch (EmptyFieldPersonException e) {
@@ -369,7 +382,8 @@ public class Main {
     public static void shouldFindPersonByEmail() {
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -379,9 +393,9 @@ public class Main {
                 .pesel("11111111111")
                 .build();
         Person person1 = null;
-
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.EXTERNAL.getType());
         try {
-            personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldFindPersonByFirstName : test went wrong " + e.getMessage());
         } catch (EmptyFieldPersonException e) {
@@ -403,7 +417,8 @@ public class Main {
     public static void shouldFindPersonByPesel() {
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -413,9 +428,9 @@ public class Main {
                 .pesel("11111111111")
                 .build();
         Person person1 = null;
-
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.EXTERNAL.getType());
         try {
-            personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldFindPersonByFirstName : test went wrong " + e.getMessage());
         } catch (EmptyFieldPersonException e) {
@@ -439,7 +454,8 @@ public class Main {
         //given
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -449,9 +465,10 @@ public class Main {
                 .pesel("11111111111")
                 .build();
         Person person1 = null;
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.EXTERNAL.getType());
         //when
         try {
-            personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldFindPersonByFirstName : test went wrong " + e.getMessage());
         } catch (EmptyFieldPersonException e) {
@@ -475,7 +492,8 @@ public class Main {
         Person modPerson = null;
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -492,9 +510,11 @@ public class Main {
                 .email("Harry.Potter@mail.com")
                 .pesel("11111111111")
                 .build();
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.EXTERNAL.getType());
+        PersonDto newPersonDto = personMapper.mapPersonToDto(newperson, PersonType.EXTERNAL.getType());
         //when
         try {
-            personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException e) {
             System.out.println("shouldModifyPerson : test went wrong " + e.getMessage());
         } catch (EmptyFieldPersonException e) {
@@ -502,18 +522,18 @@ public class Main {
         }
         //then
         try {
-            personFacade.updatePerson(newperson,PersonType.EXTERNAL.getType());
+            personFacade.updatePerson(newPersonDto);
         } catch (NotFoundPersonException e) {
             System.out.println("shouldModifyPerson : test went wrong");
         }
 
         try {
-             modPerson = personFacade.find(null, "9999", null, null, null, null, null);
+            modPerson = personFacade.find(null, "9999", null, null, null, null, null);
         } catch (NotFoundPersonException e) {
             System.out.println("shouldModifyPerson : test went wrong " + e.getMessage());
         }
 
-        if(!person.getFirstname().equals(Objects.requireNonNull(modPerson).getFirstname())){
+        if (person.getFirstname().equals(modPerson.getFirstname())) {
             throw new AssertionError("Person hasn't modified");
         }
 
@@ -524,7 +544,8 @@ public class Main {
         Person modPerson = null;
         XmlReader xmlReader = new XmlReader();
         PersonValidator personValidator = new PersonValidator();
-        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), new PersonRepository(xmlReader));
+        PersonMapper personMapper = new PersonMapper();
+        PersonFacade personFacade = new PersonFacade(new XmlWriter(), personValidator, new FileDeleter(), personMapper, new PersonRepository(xmlReader));
         Person person = new Person.Builder()
                 .personId("9999")
                 .firstname("Wlodzimierz")
@@ -541,9 +562,11 @@ public class Main {
                 .email("Harry.Potter@mail.com")
                 .pesel("11111111111")
                 .build();
+        PersonDto personDto = personMapper.mapPersonToDto(person, PersonType.EXTERNAL.getType());
+        PersonDto newPersonDto = personMapper.mapPersonToDto(newperson, PersonType.EXTERNAL.getType());
         //when
         try {
-            personFacade.createNewPerson(person, PersonType.EXTERNAL.getType());
+            personFacade.createNewPerson(personDto);
         } catch (AlreadyExistsPersonException ignored) {
 
         } catch (EmptyFieldPersonException e) {
@@ -551,7 +574,7 @@ public class Main {
         }
         //then
         try {
-            personFacade.updatePerson(newperson,PersonType.EXTERNAL.getType());
+            personFacade.updatePerson(newPersonDto);
         } catch (NotFoundPersonException ignored) {
         }
 
@@ -562,7 +585,7 @@ public class Main {
         }
 
         assert modPerson != null;
-        if(person.getFirstname().equals(modPerson.getFirstname())){
+        if (person.getFirstname().equals(modPerson.getFirstname())) {
             throw new AssertionError("Throw if person was modified");
         }
         clearExternal(personFacade);

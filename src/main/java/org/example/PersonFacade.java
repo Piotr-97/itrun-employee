@@ -4,9 +4,11 @@ import org.example.exceptions.AlreadyExistsPersonException;
 import org.example.exceptions.EmptyFieldPersonException;
 import org.example.exceptions.NotFoundPersonException;
 import org.example.model.Person;
+import org.example.model.PersonDto;
 import org.example.model.PersonType;
 import org.example.repository.PersonRepository;
 import org.example.utils.FileDeleter;
+import org.example.utils.PersonMapper;
 import org.example.utils.PersonValidator;
 import org.example.utils.XmlWriter;
 import org.xml.sax.SAXException;
@@ -22,18 +24,23 @@ public class PersonFacade {
     private final XmlWriter xmlWriter;
     private final PersonValidator personValidator;
     private final FileDeleter fileDeleter;
+    private final PersonMapper personMapper;
     private final PersonRepository personRepository;
     private static final String PATH_TO_INTERNALS = System.getProperty("user.dir") + File.separator + "internal";
     private static final String PATH_TO_EXTERNALS = System.getProperty("user.dir") + File.separator + "external";
 
-    public PersonFacade(XmlWriter xmlWriter, PersonValidator personValidator, FileDeleter fileDeleter, PersonRepository personRepository) {
+    public PersonFacade(XmlWriter xmlWriter, PersonValidator personValidator, FileDeleter fileDeleter, PersonMapper personMapper, PersonRepository personRepository) {
         this.xmlWriter = xmlWriter;
         this.personValidator = personValidator;
         this.fileDeleter = fileDeleter;
+        this.personMapper = personMapper;
         this.personRepository = personRepository;
     }
 
-    public void createNewPerson(Person person, String type) throws AlreadyExistsPersonException, EmptyFieldPersonException {
+    public void createNewPerson(PersonDto personDto) throws AlreadyExistsPersonException, EmptyFieldPersonException {
+        Person person = personMapper.mapDtoToPerson(personDto);
+        String type = personDto.type();
+
         personValidator.checkPerson(person);
         if (type.equals(PersonType.INTERNAL.getType())) {
             createNewInternalPerson(person, type);
@@ -45,6 +52,7 @@ public class PersonFacade {
     }
 
     private void createNewInternalPerson(Person person, String type) throws AlreadyExistsPersonException {
+
         if (personRepository.isInternalPersonAlreadyExists(person)) {
             throw new AlreadyExistsPersonException("Person already exists in database");
         }
@@ -99,7 +107,10 @@ public class PersonFacade {
         return person;
     }
 
-    public void updatePerson(Person person, String type) throws NotFoundPersonException {
+    public void updatePerson(PersonDto personDto) throws NotFoundPersonException {
+        Person person = personMapper.mapDtoToPerson(personDto);
+        String type = personDto.type();
+
         try {
             personRepository.update(person, type);
             xmlWriter.modifyPersonXml(person, type);

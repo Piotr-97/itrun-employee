@@ -138,7 +138,7 @@ public class PersonRepository {
             oldPerson.setFirstname(newPerson.getFirstname());
         }
         if (!oldPerson.getLastname().equals(newPerson.getLastname())) {
-            oldPerson.setFirstname(newPerson.getLastname());
+            oldPerson.setLastname(newPerson.getLastname());
         }
         if (!oldPerson.getEmail().equals(newPerson.getEmail())) {
             oldPerson.setEmail(newPerson.getEmail());
