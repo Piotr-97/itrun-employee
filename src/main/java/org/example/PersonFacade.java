@@ -112,10 +112,12 @@ public class PersonFacade {
         String type = personDto.type();
 
         try {
+            personValidator.checkPerson(person);
             personRepository.update(person, type);
             xmlWriter.modifyPersonXml(person, type);
 
-        } catch (ParserConfigurationException | IOException | SAXException | TransformerException e) {
+        } catch (ParserConfigurationException | IOException | SAXException | TransformerException |
+                 EmptyFieldPersonException e) {
             throw new RuntimeException(e);
         }
     }
