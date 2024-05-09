@@ -20,7 +20,6 @@ import java.util.Map;
 public class PersonFacade {
     public static final String XML_FILE_EXTENSION = ".xml";
     private final XmlWriter xmlWriter;
-
     private final PersonValidator personValidator;
     private final FileDeleter fileDeleter;
     private final PersonRepository personRepository;
@@ -42,7 +41,6 @@ public class PersonFacade {
         } else if (type.equals(PersonType.EXTERNAL.getType())) {
             createNewExternalPerson(person, type);
         }
-
 
     }
 
